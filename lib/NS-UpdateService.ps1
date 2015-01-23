@@ -230,7 +230,7 @@ function Invoke-NSNitroRestApi {
 
 Set-NSMgmtProtocol -Protocol $NSProtocol
 $myNSSession = Connect-NSAppliance -NSAddress $NSAddress -NSUserName $NSUserName -NSPassword $NSPassword
-$payload = @{name=$ServiceName,gracefull=YES,delay=300 }
+$payload = @{name=$ServiceName }
 
 Invoke-NSNitroRestApi -NSSession $myNSSession -OperationMethod POST -ResourceType service -Payload $payload -Action $Action
 if ($lastExitCode -ne 0) {
