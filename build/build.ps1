@@ -16,12 +16,12 @@ ls $MyDir\tmp
 
 if((Get-Module psake) -eq $null)
 {
-    Import-Module $MyDir\tmp\packages\psake.4.4.1\tools\psake.psm1
+    Import-Module $MyDir\build\tmp\packages\psake.4.4.1\tools\psake.psm1
 }
 
 $psake.use_exit_on_error = $true
 Invoke-psake -buildFile $MyDir'.\Default.ps1' -parameters @{"Version"=$Version}
 
-Remove-Item $MyDir\tmp -recurse -Confirm:$false
+#Remove-Item $MyDir\tmp -recurse -Confirm:$false
 
 if ($psake.build_success -eq $false) { exit 1 } else { exit 0 }
