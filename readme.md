@@ -11,3 +11,5 @@ Examples, Octopus ...
 
 # Status #
 Work in progress. For the intended use of this library, it will result in a step template for Octopus Deploy on [library.octopusdeploy.com](http://library.octopusdeploy.com) and a nupkg on nuget.org.
+
+[![Build status](https://ci.appveyor.com/api/projects/status/r60fxltqu1w0k6ar?svg=true)](https://ci.appveyor.com/project/jnus/netscalerpslib)
