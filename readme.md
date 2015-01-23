@@ -1,5 +1,5 @@
 # What #
-Powershell library for the Citrix NetScaler ADC. This library uses the Nitro REST API
+Powershell library for the Citrix NetScaler ADC. This library uses the Nitro REST API and has no other dependencies. Currently only tested against NS10.1: Build 119.7.
 
 # Why #
 Deployment Automation....
