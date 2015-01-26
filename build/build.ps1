@@ -12,8 +12,6 @@ if ((Test-Path $NuGetExe) -eq $false) {(New-Object System.Net.WebClient).Downloa
 
 & $NuGetExe install psake -OutputDirectory $MyDir\tmp\packages -Version 4.4.1
 
-ls $MyDir\tmp
-
 if((Get-Module psake) -eq $null)
 {
     Import-Module $MyDir\tmp\packages\psake.4.4.1\tools\psake.psm1
@@ -21,7 +19,5 @@ if((Get-Module psake) -eq $null)
 
 $psake.use_exit_on_error = $true
 Invoke-psake -buildFile $MyDir'.\Default.ps1' -parameters @{"Version"=$Version}
-
-#Remove-Item $MyDir\tmp -recurse -Confirm:$false
 
 if ($psake.build_success -eq $false) { exit 1 } else { exit 0 }

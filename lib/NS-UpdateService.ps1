@@ -1,11 +1,17 @@
-param(
-        [Parameter(Mandatory=$true)] [string]$NSAddress,
-        [Parameter(Mandatory=$true)] [string]$ServiceName,
-        [Parameter(Mandatory=$true)] [string]$Action,
-        [Parameter(Mandatory=$false)] [string]$NSUserName="nsroot",
-        [Parameter(Mandatory=$false)] [string]$NSPassword="nsroot",
-        [Parameter(Mandatory=$false)] [string]$NSProtocol="http"
-    )
+$psver = $PSVersionTable.PSVersion.Major
+if ($psver -eq "1" -or $psver -eq "2") {
+    Write-Error "NetScaler ADC Enable Disable Service requires PowerShell v3 or newer. Installed version v$psver"
+    return -1
+}
+
+$NSAddress = $OctopusParameters['HostName']
+$NSUserName = $OctopusParameters['Username']
+$NSPassword = $OctopusParameters['Password']
+$NSProtocol="http"
+$Action = $OctopusParameters['EnableOrDisable']
+$ServiceName = $OctopusParameters['ServiceName']
+$GracefulShutdown = $OctopusParameters['Graceful']
+$GraceFulShutdownDelay = $OctopusParameters['GracefulDelay']
 
 
 function Connect-NSAppliance {
@@ -232,7 +238,7 @@ Set-NSMgmtProtocol -Protocol $NSProtocol
 $myNSSession = Connect-NSAppliance -NSAddress $NSAddress -NSUserName $NSUserName -NSPassword $NSPassword
 $payload = @{name=$ServiceName}
 if($Action -eq "disable") {
-    $payload = @{name=$ServiceName;graceful="YES";delay=300}
+    $payload = @{name=$ServiceName;graceful=$GracefulShutdown;delay=$GraceFulShutdownDelay}
 }
-
+Write-Host "ServiceName: $ServiceName"
 Invoke-NSNitroRestApi -NSSession $myNSSession -OperationMethod POST -ResourceType service -Payload $payload -Action $Action
