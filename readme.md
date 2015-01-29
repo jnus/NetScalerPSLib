@@ -5,8 +5,8 @@ Powershell library for the Citrix NetScaler ADC. This library uses the Nitro RES
 We needed to automate our manual NLB actions when deploying, minimize deployment time and minimize human errors when deploying. 
 
 # How #
-- Go to library.octopusdeploy.com and import to Octopus Deploy
-- Add the step to the process and select the option 'Configure a rolling deployment' and number of concurrent machines to install to. The step has no dependecies, hence each host can disable it self. If you name your LB services by host name, you can set the service paramater to #{Octopus.Machine.Hostname}.  
+- Go to library.octopusdeploy.com and import the 'NetScaler ADC - Enable or Disable Service' template to Octopus Deploy
+- Add the step to the process and select the option 'Configure a rolling deployment' and number of concurrent machines to install to. The step has no dependecies, hence each host can disable it self. If you name your LB services by host name, you can set the service parameter to #{Octopus.Machine.Hostname}.  
 - fill out connection information and options such as graceful shutdown, timeout and action.
 
 # Status [![Build status](https://ci.appveyor.com/api/projects/status/r60fxltqu1w0k6ar?svg=true)](https://ci.appveyor.com/project/jnus/netscalerpslib)
