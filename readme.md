@@ -14,6 +14,6 @@ Work in progress. For the intended use of this library, it will result in a step
 
 ## Feature progress ##
 - Enable/Disable Load Balancing Services: done
-- Octopus Step Template: pending.
+- Octopus Step Template: done
 - Get list of services in Load Balancing Virtual Server: todo
 - Get Status of Load Balancing Service/Virtual Server: todo
