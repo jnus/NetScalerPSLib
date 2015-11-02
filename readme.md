@@ -10,7 +10,7 @@ We needed to automate our manual NLB actions when deploying, minimize deployment
 - fill out connection information and options such as graceful shutdown, timeout and action.
 
 # Status [![Build status](https://ci.appveyor.com/api/projects/status/r60fxltqu1w0k6ar?svg=true)](https://ci.appveyor.com/project/jnus/netscalerpslib)
-Work in progress. For the intended use of this library, it will result in a step template for Octopus Deploy on [library.octopusdeploy.com](http://library.octopusdeploy.com) and a nupkg on nuget.org.
+Step template for Octopus Deploy on [library.octopusdeploy.com](http://library.octopusdeploy.com). Might create a generic Powershell lib for nuget.org, if requested. 
 
 ## Feature progress ##
 - Enable/Disable Load Balancing Services: done
