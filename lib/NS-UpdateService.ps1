@@ -7,7 +7,7 @@ if ($psver -eq "1" -or $psver -eq "2") {
 $NSAddress = $OctopusParameters['HostName']
 $NSUserName = $OctopusParameters['Username']
 $NSPassword = $OctopusParameters['Password']
-$NSProtocol="http"
+$NSProtocol=$OctopusParameters['Protocol']
 $Action = $OctopusParameters['EnableOrDisable']
 $ServiceName = $OctopusParameters['ServiceName']
 $GracefulShutdown = $OctopusParameters['Graceful']
@@ -50,11 +50,6 @@ function Connect-NSAppliance {
     Write-Verbose "$($MyInvocation.MyCommand): Enter"
 
     if ($PSCmdlet.ParameterSetName -eq 'Address') {
-        Write-Verbose "Validating IP Address"
-        $IPAddressObj = New-Object -TypeName System.Net.IPAddress -ArgumentList 0
-        if (-not [System.Net.IPAddress]::TryParse($NSAddress,[ref]$IPAddressObj)) {
-            throw "'$NSAddress' is an invalid IP address"
-        }
         $nsEndpoint = $NSAddress
     } elseif ($PSCmdlet.ParameterSetName -eq 'Name') {
         $nsEndpoint = $NSName

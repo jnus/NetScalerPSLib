@@ -55,6 +55,15 @@
         "Octopus.ControlType": "SingleLineText"
       }
     },
+	{
+      "Name": "Protocol",
+      "Label": "NetScaler ADC Protocol",
+      "HelpText": "http or https",
+      "DefaultValue": "http",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      }
+    },
     {
       "Name": "Graceful",
       "Label": "Graceful shutdown",
