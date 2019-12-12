@@ -4,15 +4,44 @@ if ($psver -eq "1" -or $psver -eq "2") {
     return -1
 }
 
-$NSAddress = $OctopusParameters['HostName']
+$NSHostname = $OctopusParameters['HostName']
 $NSUserName = $OctopusParameters['Username']
 $NSPassword = $OctopusParameters['Password']
-$NSProtocol="http"
+$NSProtocol= $OctopusParameters['Protocol']
 $Action = $OctopusParameters['EnableOrDisable']
 $ServiceName = $OctopusParameters['ServiceName']
 $GracefulShutdown = $OctopusParameters['Graceful']
 $GraceFulShutdownDelay = $OctopusParameters['GracefulDelay']
 
+if(!$NSHostname) {
+    Write-Error "No NetScaler hostname specified. Please specify hostname or IP Address of NetScaler."
+    exit -2
+}
+
+if(!$NSUserName) {
+    Write-Error "No username specified. Please specify a username"
+    exit -2
+}
+
+if(!$NSPassword) {
+    Write-Error "No password specified. Please specify a password"
+    exit -2
+}
+
+if(!$Action) {
+    Write-Error "No action set. Action must either be enable or disable. Please select an action"
+    exit -2
+}
+
+if(!$GracefulShutdown) {
+    Write-Error "Graceful shutdown not selected. Must either be yes or no. Please select an option"
+    exit -2
+}
+
+if(!$ServiceName) {
+    Write-Error "Service name must be specified. Please specify service name"
+    exist -2
+}
 
 function Connect-NSAppliance {
     <#
@@ -20,10 +49,8 @@ function Connect-NSAppliance {
         Connect to NetScaler Appliance
     .DESCRIPTION
         Connect to NetScaler Appliance. A custom web request session object will be returned
-    .PARAMETER NSAddress
-        NetScaler Management IP address
-    .PARAMETER NSName
-        NetScaler DNS name or FQDN
+    .PARAMETER NSHostName
+        NetScaler Management IP address or DNS name or FQDN
     .PARAMETER NSUserName
         UserName to access the NetScaler appliance
     .PARAMETER NSPassword
@@ -41,32 +68,21 @@ function Connect-NSAppliance {
     #>
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true,ParameterSetName='Address')] [string]$NSAddress,
-        [Parameter(Mandatory=$true,ParameterSetName='Name')] [string]$NSName,
+        [Parameter(Mandatory=$true)] [string]$NSHostname,
         [Parameter(Mandatory=$false)] [string]$NSUserName="nsroot",
         [Parameter(Mandatory=$false)] [string]$NSPassword="nsroot",
         [Parameter(Mandatory=$false)] [int]$Timeout=900
     )
     Write-Verbose "$($MyInvocation.MyCommand): Enter"
-
-    if ($PSCmdlet.ParameterSetName -eq 'Address') {
-        Write-Verbose "Validating IP Address"
-        $IPAddressObj = New-Object -TypeName System.Net.IPAddress -ArgumentList 0
-        if (-not [System.Net.IPAddress]::TryParse($NSAddress,[ref]$IPAddressObj)) {
-            throw "'$NSAddress' is an invalid IP address"
-        }
-        $nsEndpoint = $NSAddress
-    } elseif ($PSCmdlet.ParameterSetName -eq 'Name') {
-        $nsEndpoint = $NSName
-    }
-
+    $nsEndpoint = $NSHostname
 
     $login = @{"login" = @{"username"=$NSUserName;"password"=$NSPassword;"timeout"=$Timeout}}
     $loginJson = ConvertTo-Json $login
 
     try {
         Write-Verbose "Calling Invoke-RestMethod for login"
-        $response = Invoke-RestMethod -Uri "$($Script:NSURLProtocol)://$nsEndpoint/nitro/v1/config/login" -Body $loginJson -Method POST -SessionVariable saveSession -ContentType application/json
+        $address = "$($Script:NSURLProtocol)://$nsEndpoint/nitro/v1/config/login"
+        $response = Invoke-RestMethod -Uri $address -Body $loginJson -Method POST -SessionVariable saveSession -ContentType application/json
 
         if ($response.severity -eq "ERROR") {
             throw "Error. See response: `n$($response | fl * | Out-String)"
@@ -105,6 +121,15 @@ function Set-NSMgmtProtocol {
     param (
         [Parameter(Mandatory=$true)] [ValidateSet("http","https")] [string]$Protocol
     )
+
+    if($Protocol -eq "https") {
+        # Allow the use of self-signed SSL certificates.
+        [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $True }
+                
+        # Force TLS 1.2 protocol. Invoke-RestMethod uses 1.0 by default
+        Write-Verbose -Message ('{0} - Forcing TLS 1.2 protocol for invoking REST method.' -f $MyInvocation.MyCommand.Name)
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    }
 
     Write-Verbose "$($MyInvocation.MyCommand): Enter"
 
@@ -190,7 +215,7 @@ function Invoke-NSNitroRestApi {
         $hashtablePayload = @{}
         $hashtablePayload."params" = @{"warning"=$warning;"onerror"=$OnErrorAction;<#"action"=$Action#>}
         $hashtablePayload.$ResourceType = $Payload
-        $jsonPayload = ConvertTo-Json $hashtablePayload -Depth ([int]::MaxValue)
+        $jsonPayload = ConvertTo-Json $hashtablePayload
         Write-Verbose "JSON Payload:`n$jsonPayload"
     }
 
@@ -233,9 +258,8 @@ function Invoke-NSNitroRestApi {
     }
 }
 
-
 Set-NSMgmtProtocol -Protocol $NSProtocol
-$myNSSession = Connect-NSAppliance -NSAddress $NSAddress -NSUserName $NSUserName -NSPassword $NSPassword
+$myNSSession = Connect-NSAppliance -NSHostname $NSHostname -NSUserName $NSUserName -NSPassword $NSPassword
 $payload = @{name=$ServiceName}
 if($Action -eq "disable") {
     $payload = @{name=$ServiceName;graceful=$GracefulShutdown;delay=$GraceFulShutdownDelay}
